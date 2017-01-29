@@ -6,6 +6,15 @@ from copy import deepcopy
 from markdown import markdown
 
 
+TEMPLATES_DIRECTORY = 'templates'
+ARTICLES_DIRECTORY = 'articles/'
+SITE_DIRECTORY = 'docs/'
+
+INDEX_FILENAME = 'index.html'
+ARTICLE_FILENAME = 'article.html'
+CONFIG_FILENAME = 'config.json'
+
+
 def read_config(config_location):
     with open(config_location, 'r') as config_file:
         return json.load(config_file)
@@ -77,20 +86,14 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
         save_file(html_article, html_output_location)
 
 def main():
-    config = read_config('config.json')
-    articles_dir_location = 'articles/'
-    index_filename = 'index.html'
-    article_filename = 'article.html'
-    site_directory = 'docs/'
-    templates_location = 'templates'
-
-    article_template_location = '{}/{}'.format(templates_location, article_filename)
-    index_template_location = '{}/{}'.format(templates_location, index_filename)
-    index_result_location = '{}{}'.format(site_directory, index_filename)
-    if not os.path.exists(site_directory): os.mkdir(site_directory)
+    config = read_config(CONFIG_FILENAME)
+    article_template_location = '{}/{}'.format(TEMPLATES_DIRECTORY, ARTICLE_FILENAME)
+    index_template_location = '{}/{}'.format(TEMPLATES_DIRECTORY, INDEX_FILENAME)
+    index_result_location = '{}{}'.format(SITE_DIRECTORY, INDEX_FILENAME)
+    if not os.path.exists(SITE_DIRECTORY): os.mkdir(SITE_DIRECTORY)
 
     create_index(index_template_location, index_result_location, config)
-    create_articles(article_template_location, articles_dir_location, site_directory, config)
+    create_articles(article_template_location, ARTICLES_DIRECTORY, SITE_DIRECTORY, config)
 
 
 if __name__ == '__main__':
