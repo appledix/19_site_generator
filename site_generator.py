@@ -6,7 +6,7 @@ from copy import deepcopy
 from markdown import markdown
 
 
-TEMPLATES_DIRECTORY = 'templates'
+TEMPLATES_DIRECTORY = 'templates/'
 ARTICLES_DIRECTORY = 'articles/'
 SITE_DIRECTORY = 'docs/'
 
@@ -41,7 +41,7 @@ def get_articles_with_html_location(articles):
     return html_articles
 
 def get_article_output_location(site_directory, article_location):
-    location = '{}/{}'.format(site_directory, article_location)
+    location = os.path.join(site_directory, article_location)
     return change_file_extension(location, 'html')
 
 def convert_md_article_to_html(j_template, md_content, a_topic, a_title):
@@ -72,7 +72,7 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
         html_output_location = get_article_output_location(site_dir, a_location)
         article_output_dir = get_dir(html_output_location)
         if not os.path.exists(article_output_dir): os.mkdir(article_output_dir)
-        md_source_location = '{}{}'.format(articles_dir_location, a_location)
+        md_source_location = os.path.join(articles_dir_location, a_location)
 
         if os.path.exists(html_output_location) \
         and is_html_up_to_date(html_output_location, md_source_location) \
@@ -87,9 +87,9 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
 
 def main():
     config = read_config(CONFIG_FILENAME)
-    article_template_location = '{}/{}'.format(TEMPLATES_DIRECTORY, ARTICLE_FILENAME)
-    index_template_location = '{}/{}'.format(TEMPLATES_DIRECTORY, INDEX_FILENAME)
-    index_result_location = '{}{}'.format(SITE_DIRECTORY, INDEX_FILENAME)
+    article_template_location = os.path.join(TEMPLATES_DIRECTORY, ARTICLE_FILENAME)
+    index_template_location = os.path.join(TEMPLATES_DIRECTORY, INDEX_FILENAME)
+    index_result_location = os.path.join(SITE_DIRECTORY, INDEX_FILENAME)
     if not os.path.exists(SITE_DIRECTORY): os.mkdir(SITE_DIRECTORY)
 
     create_index(index_template_location, index_result_location, config)
