@@ -42,15 +42,18 @@ def convert_md_article_to_html(j_template, md_content, a_topic, a_title):
                             'topic': a_topic,
                             'title': a_title})
 
+def is_html_up_to_date(html_location, source_location):
+    return os.path.getmtime(html_location) > os.path.getmtime(source_location)
+
 def create_index(index_template_location, index_result_location, config):
+    if os.path.exists(index_result_location) \
+    and is_html_up_to_date(index_result_location, index_template_location):
+        return
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'), autoescape=True)
     index_template = env.get_template(index_template_location)
     articles = get_articles_with_html_location(config['articles'])
     index_html = index_template.render(topics=config['topics'], articles=articles)
     save_file(index_html, index_result_location)
-
-def is_html_up_to_date(html_location, source_location):
-    return os.path.getmtime(html_location) > os.path.getmtime(source_location)
 
 def create_articles(article_template_location, articles_dir_location, site_dir, config):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('./') , autoescape=True)
@@ -61,8 +64,10 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
         article_output_dir = get_dir(html_output_location)
         if not os.path.exists(article_output_dir): os.mkdir(article_output_dir)
         md_source_location = '{}{}'.format(articles_dir_location, a_location)
+
         if os.path.exists(html_output_location) \
-        and is_html_up_to_date(html_output_location, md_source_location):
+        and is_html_up_to_date(html_output_location, md_source_location) \
+        and is_html_up_to_date(html_output_location, article_template_location):
             continue
         article_md_content = read_file(md_source_location)
         html_article = convert_md_article_to_html(article_template,
@@ -77,12 +82,11 @@ def main():
     index_filename = 'index.html'
     article_filename = 'article.html'
     site_directory = 'docs/'
-    templates_location = '/templates'
+    templates_location = 'templates'
 
     article_template_location = '{}/{}'.format(templates_location, article_filename)
     index_template_location = '{}/{}'.format(templates_location, index_filename)
     index_result_location = '{}{}'.format(site_directory, index_filename)
-
     if not os.path.exists(site_directory): os.mkdir(site_directory)
 
     create_index(index_template_location, index_result_location, config)
