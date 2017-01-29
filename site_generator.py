@@ -34,10 +34,10 @@ def change_file_extension(file_location, to_ext):
 def get_dir(filepath):
     return os.path.split(filepath)[0]
 
-def get_articles_with_html_location(articles):
+def get_articles_with_correct_location(articles):
     html_articles = deepcopy(articles)
     for a in html_articles:
-        a['source'] = change_file_extension(a['source'], 'html')
+        a['source'] = change_file_extension(a['source'], 'html').replace(" ", "_")
     return html_articles
 
 def get_article_output_location(site_directory, article_location):
@@ -60,7 +60,7 @@ def create_index(index_template_location, index_result_location, config):
         return
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'), autoescape=True)
     index_template = env.get_template(index_template_location)
-    articles = get_articles_with_html_location(config['articles'])
+    articles = get_articles_with_correct_location(config['articles'])
     index_html = index_template.render(topics=config['topics'], articles=articles)
     save_file(index_html, index_result_location)
 
