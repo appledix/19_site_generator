@@ -76,7 +76,7 @@ def main():
     articles_dir_location = 'articles/'
     index_filename = 'index.html'
     article_filename = 'article.html'
-    site_directory = 'site/'
+    site_directory = 'docs/'
     templates_location = '/templates'
 
     article_template_location = '{}/{}'.format(templates_location, article_filename)
