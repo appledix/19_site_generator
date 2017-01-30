@@ -56,8 +56,8 @@ def is_html_up_to_date(html_location, source_location):
     return os.path.getmtime(html_location) > os.path.getmtime(source_location)
 
 def create_index(index_template_location, index_result_location,config,
-                 overwrite_flag=False):
-    if (not overwrite_flag) \
+                 only_outdated=False):
+    if only_outdated \
     and os.path.exists(index_result_location) \
     and is_html_up_to_date(index_result_location, index_template_location):
         return
@@ -68,7 +68,7 @@ def create_index(index_template_location, index_result_location,config,
     save_file(index_html, index_result_location)
 
 def create_articles(article_template_location, articles_dir_location, site_dir, config,
-                    overwrite_flag=False):
+                    only_outdated=False):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('./') , autoescape=True)
     article_template = env.get_template(article_template_location)
     for article in config['articles']:
@@ -78,7 +78,7 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
         if not os.path.exists(article_output_dir): os.mkdir(article_output_dir)
         md_source_location = os.path.join(articles_dir_location, a_location)
 
-        if (not overwrite_flag) \
+        if only_outdated \
         and os.path.exists(html_output_location) \
         and is_html_up_to_date(html_output_location, md_source_location) \
         and is_html_up_to_date(html_output_location, article_template_location):
@@ -90,13 +90,13 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
                                                   article['title'])
         save_file(html_article, html_output_location)
 
-def get_overwrite_flag():
+def get_light_assembly_flag():
     parser = argparse.ArgumentParser(description='Create site with devman articles')
-    parser.add_argument('-f', action='store_true', help='Force script to overwrite all files')
-    return parser.parse_args().f
+    parser.add_argument('-light', action='store_true', help='Cause script to overwrite only outdated files')
+    return parser.parse_args().light
 
 def main():
-    overwrite_flag = get_overwrite_flag()
+    light_assembly_flag = get_light_assembly_flag()
     config = read_config(CONFIG_FILENAME)
     article_template_location = os.path.join(TEMPLATES_DIRECTORY, ARTICLE_FILENAME)
     index_template_location = os.path.join(TEMPLATES_DIRECTORY, INDEX_FILENAME)
@@ -106,12 +106,12 @@ def main():
     create_index(index_template_location,
                  index_result_location,
                  config,
-                 overwrite_flag)
+                 only_outdated=light_assembly_flag)
     create_articles(article_template_location,
                     ARTICLES_DIRECTORY,
                     SITE_DIRECTORY,
                     config,
-                    overwrite_flag)
+                    only_outdated=light_assembly_flag)
 
 
 if __name__ == '__main__':
