@@ -1,3 +1,4 @@
+import argparse
 import os
 import json
 import jinja2
@@ -54,8 +55,10 @@ def convert_md_article_to_html(j_template, md_content, a_topic, a_title):
 def is_html_up_to_date(html_location, source_location):
     return os.path.getmtime(html_location) > os.path.getmtime(source_location)
 
-def create_index(index_template_location, index_result_location, config):
-    if os.path.exists(index_result_location) \
+def create_index(index_template_location, index_result_location,config,
+                 overwrite_flag=False):
+    if (not overwrite_flag) \
+    and os.path.exists(index_result_location) \
     and is_html_up_to_date(index_result_location, index_template_location):
         return
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('./'), autoescape=True)
@@ -64,7 +67,8 @@ def create_index(index_template_location, index_result_location, config):
     index_html = index_template.render(topics=config['topics'], articles=articles)
     save_file(index_html, index_result_location)
 
-def create_articles(article_template_location, articles_dir_location, site_dir, config):
+def create_articles(article_template_location, articles_dir_location, site_dir, config,
+                    overwrite_flag=False):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('./') , autoescape=True)
     article_template = env.get_template(article_template_location)
     for article in config['articles']:
@@ -74,7 +78,8 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
         if not os.path.exists(article_output_dir): os.mkdir(article_output_dir)
         md_source_location = os.path.join(articles_dir_location, a_location)
 
-        if os.path.exists(html_output_location) \
+        if (not overwrite_flag) \
+        and os.path.exists(html_output_location) \
         and is_html_up_to_date(html_output_location, md_source_location) \
         and is_html_up_to_date(html_output_location, article_template_location):
             continue
@@ -85,15 +90,28 @@ def create_articles(article_template_location, articles_dir_location, site_dir, 
                                                   article['title'])
         save_file(html_article, html_output_location)
 
+def get_overwrite_flag():
+    parser = argparse.ArgumentParser(description='Create site with devman articles')
+    parser.add_argument('-f', action='store_true', help='Force script to overwrite all files')
+    return parser.parse_args().f
+
 def main():
+    overwrite_flag = get_overwrite_flag()
     config = read_config(CONFIG_FILENAME)
     article_template_location = os.path.join(TEMPLATES_DIRECTORY, ARTICLE_FILENAME)
     index_template_location = os.path.join(TEMPLATES_DIRECTORY, INDEX_FILENAME)
     index_result_location = os.path.join(SITE_DIRECTORY, INDEX_FILENAME)
-    if not os.path.exists(SITE_DIRECTORY): os.mkdir(SITE_DIRECTORY)
 
-    create_index(index_template_location, index_result_location, config)
-    create_articles(article_template_location, ARTICLES_DIRECTORY, SITE_DIRECTORY, config)
+    if not os.path.exists(SITE_DIRECTORY): os.mkdir(SITE_DIRECTORY)
+    create_index(index_template_location,
+                 index_result_location,
+                 config,
+                 overwrite_flag)
+    create_articles(article_template_location,
+                    ARTICLES_DIRECTORY,
+                    SITE_DIRECTORY,
+                    config,
+                    overwrite_flag)
 
 
 if __name__ == '__main__':
