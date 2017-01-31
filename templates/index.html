@@ -57,7 +57,7 @@
             {% for article in articles %}
               {% if article['topic']==topic['slug'] %}
                 <li>
-                  <a href="{{article['source']}}">{{article['title']}}</a>
+                  <a href="{{article['source'] | urlencode}}">{{article['title']}}</a>
                 </li>
               {% endif %}
            {% endfor %}
