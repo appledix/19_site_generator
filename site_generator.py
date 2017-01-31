@@ -2,6 +2,7 @@ import argparse
 import os
 import json
 import jinja2
+import urllib
 from copy import deepcopy
 
 from markdown import markdown
@@ -38,12 +39,14 @@ def get_dir(filepath):
 def get_articles_with_correct_location(articles):
     html_articles = deepcopy(articles)
     for a in html_articles:
-        a['source'] = change_file_extension(a['source'], 'html').replace(" ", "_")
+        output_location = change_file_extension(a['source'], 'html')
+        a['source'] = urllib.parse.quote(output_location)
     return html_articles
 
 def get_article_output_location(site_directory, article_location):
     location = os.path.join(site_directory, article_location)
-    return change_file_extension(location, 'html')
+    output_location = change_file_extension(location, 'html')
+    return urllib.parse.quote(output_location)
 
 def convert_md_article_to_html(j_template, md_content, a_topic, a_title):
     extensions = ['codehilite', 'fenced_code']
